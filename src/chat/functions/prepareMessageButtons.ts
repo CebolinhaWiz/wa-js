@@ -373,6 +373,9 @@ webpack.onFullReady(() => {
       node = await encryptAndParserMsgButtons(...args, func);
     }
 
+
+
+
     if (!buttonNode) {
       return node;
     }
@@ -380,6 +383,22 @@ webpack.onFullReady(() => {
     const content =
       (node.content as websocket.WapNode[]) || (node as any).stanza.content;
 
+    // Add interactive biz node for native flow messages
+    if (proto?.viewOnceMessage?.message?.interactiveMessage) {
+        content.push(
+         websocket.smax('biz', {}, [
+          websocket.smax(
+           'interactive',
+           {
+             type: 'native_flow',
+            v: '1',
+           },
+           [websocket.smax('native_flow', { name: 'quick_reply' }, null)]
+        ),
+       ])
+     );
+    }
+    
     let bizNode = content.find((c) => c.tag === 'biz');
 
     if (!bizNode) {
